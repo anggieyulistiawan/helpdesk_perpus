@@ -1,0 +1,56 @@
+<?php
+
+class Password extends CI_Controller
+{
+    public function __construct()
+    {
+        parent::__construct();
+
+        if ($this->session->userdata('id_level') != '2') {
+            $this->session->set_flashdata('pesan', '<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    		<strong>Anda Belum Login !</strong>
+    		<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    		  <span aria-hidden="true">&times;</span>
+    		</button>
+    	  </div>');
+            redirect('login');
+        }
+    }
+
+    public function index()
+    {
+        $this->load->view('user/template/header');
+        $this->load->view('user/template/sidebar');
+        $this->load->view('user/template/v_ganti_password');
+        $this->load->view('user/template/footer');
+    }
+
+    public function gantipassword_aksi()
+    {
+        $passbaru = $this->input->post('passbaru');
+        $passulang = $this->input->post('passulang');
+
+        $this->form_validation->set_rules('passbaru', 'password baru', 'required|matches[passulang]');
+        $this->form_validation->set_rules('passulang', 'ulangi password', 'required');
+        if ($this->form_validation->run() != FALSE) {
+            $data = array('password' => md5($passbaru));
+            $id = array('id_akun' => $this->session->userdata('id_akun'));
+            $this->M_akun->update_data('tb_akun', $data, $id);
+            $this->session->set_flashdata('pesan', '<div class="alert alert-success alert-dismissible fade show" role="alert">
+			<strong>Password berhasil di ubah !</strong>
+			<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+			  <span aria-hidden="true">&times;</span>
+			</button>
+		  </div>');
+            redirect('login');
+        } else {
+            $this->session->set_flashdata('pesan', '<div class="alert alert-danger alert-dismissible fade show" role="alert">
+			<strong>Password tidak sama, harap coba lagi !</strong>
+			<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+			  <span aria-hidden="true">&times;</span>
+			</button>
+		  </div>');
+            redirect('user/password');
+        }
+    }
+}
